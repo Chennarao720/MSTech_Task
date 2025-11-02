@@ -6,9 +6,10 @@ import { Context } from "../GlobalContext/MyContextProvider";
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 New state for search
   const productsPerPage = 6;
   const navigate = useNavigate();
-  const { user, cart, updateCart } = useContext(Context);
+  const { user, updateCart } = useContext(Context);
 
   // ✅ Fetch all products
   useEffect(() => {
@@ -18,16 +19,21 @@ const AllProducts = () => {
       .catch(console.error);
   }, []);
 
-  // ✅ Pagination logic
+  // ✅ Filter products based on search input
+  const filteredProducts = products.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // ✅ Pagination logic (apply after filtering)
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
+  const currentProducts = filteredProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  // ✅ Add to cart logic
+  // ✅ Add to cart
   const handleAddToCart = (product) => {
     if (!user) {
       alert("Please login to add items to cart!");
@@ -37,7 +43,7 @@ const AllProducts = () => {
     updateCart(product);
   };
 
-  // ✅ Buy now logic
+  // ✅ Buy now
   const handleBuyNow = (product) => {
     if (!user) {
       alert("Please login to buy this product!");
@@ -47,7 +53,7 @@ const AllProducts = () => {
     navigate(`/products/${product.id}`);
   };
 
-  // ✅ Pagination buttons
+  // ✅ Pagination controls
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
@@ -60,6 +66,20 @@ const AllProducts = () => {
       <h1 className="text-3xl font-bold mb-6 text-center text-yellow-700">
         🛍️ All Products
       </h1>
+
+      {/* 🔍 Search Bar */}
+      <div className="flex justify-center mb-6">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset to first page on search
+          }}
+          className="w-full sm:w-1/2 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -108,51 +128,53 @@ const AllProducts = () => {
           ))
         ) : (
           <p className="text-center text-gray-500 text-lg col-span-full">
-            Loading...
+            {products.length === 0 ? "Loading..." : "No products found"}
           </p>
         )}
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center items-center mt-10 space-x-2">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-lg font-semibold ${
-            currentPage === 1
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-yellow-600 text-white hover:bg-yellow-700"
-          }`}
-        >
-          Prev
-        </button>
-
-        {[...Array(totalPages)].map((_, index) => (
+      {filteredProducts.length > 0 && (
+        <div className="flex justify-center items-center mt-10 space-x-2">
           <button
-            key={index + 1}
-            onClick={() => setCurrentPage(index + 1)}
+            onClick={handlePrev}
+            disabled={currentPage === 1}
             className={`px-4 py-2 rounded-lg font-semibold ${
-              currentPage === index + 1
-                ? "bg-yellow-500 text-white"
-                : "bg-white border border-gray-300 hover:bg-yellow-100"
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-yellow-600 text-white hover:bg-yellow-700"
             }`}
           >
-            {index + 1}
+            Prev
           </button>
-        ))}
 
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className={`px-4 py-2 rounded-lg font-semibold ${
-            currentPage === totalPages
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-yellow-600 text-white hover:bg-yellow-700"
-          }`}
-        >
-          Next
-        </button>
-      </div>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-4 py-2 rounded-lg font-semibold ${
+                currentPage === index + 1
+                  ? "bg-yellow-500 text-white"
+                  : "bg-white border border-gray-300 hover:bg-yellow-100"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg font-semibold ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-yellow-600 text-white hover:bg-yellow-700"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

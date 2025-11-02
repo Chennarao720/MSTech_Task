@@ -47,22 +47,10 @@ const Address = () => {
   return (
     <>
       <ToastContainer position="top-center" autoClose={2000} />
-      {/* Header */}
-      <div className="w-[98%] bg-orange-400 flex text-white justify-around items-center rounded-[10px] p-[20px] m-auto">
-        <NavLink to="/" className="text-white font-bold text-2xl">
-          J-M
-        </NavLink>
-        <p className="font-bold">Address</p>
-      </div>
-      <br />
+      
 
       {/* Add New Address */}
-      <NavLink to="/addnewaddress">
-        <div className="w-[70%] bg-blue-400 text-white text-center rounded-[10px] p-[20px] m-auto cursor-pointer hover:bg-blue-500 transition">
-          + Add New Address
-        </div>
-      </NavLink>
-
+     
       {/* Address List */}
       <div className="mt-6 space-y-4 w-[70%] mx-auto">
         {addresses.length > 0 ? (
@@ -89,7 +77,7 @@ const Address = () => {
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 mt-3">
                 <button
-                  onClick={() => navigate(`/editaddress/${id}`)}
+                  onClick={() => navigate(`/dashboard/editaddress/${id}`)}
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all"
                 >
                   Edit
@@ -115,7 +103,12 @@ const Address = () => {
         ) : (
           <p className="text-center text-gray-500">No addresses found.</p>
         )}
-      </div>
+      </div><br />
+       <NavLink to="/dashboard/addnewaddress">
+        <div className="w-[20%] bg-orange-400 text-white text-center rounded-[10px] p-[20px] m-auto cursor-pointer hover:bg-green-500 transition">
+          + Add New Address
+        </div>
+      </NavLink>
     </>
   );
 };

@@ -12,12 +12,12 @@ const Sidebar = () => {
     `w-full text-left px-4 py-2 rounded-lg font-semibold transition ${
       isActive(path)
         ? "bg-yellow-600 text-white shadow-md"  // active style
-        : "text-gray-800 hover:bg-yellow-100"   // normal style
+        : "text-gray-300 hover:bg-yellow-200"   // normal style
     }`;
 
   return (
     <div >
-      <ul className="space-y-3">
+      <ul className="space-y-3 ">
         <li>
           <button
             onClick={() => nav("/dashboard/allproducts")}

@@ -6,6 +6,7 @@ import { motion } from "framer-motion"; // ✅ For smooth animations
 const Men = () => {
   const [cards, setCards] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 New search state
   const productsPerPage = 3;
   const { user, cart, updateCart } = useContext(Context);
   const navigate = useNavigate();
@@ -19,11 +20,19 @@ const Men = () => {
       .catch(console.error);
   }, []);
 
+  // 🔍 Filter products based on search
+  const filteredCards = cards.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = cards.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(cards.length / productsPerPage);
+  const currentProducts = filteredCards.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+  const totalPages = Math.ceil(filteredCards.length / productsPerPage);
 
   const handleAddToCart = (product) => {
     if (!user) {
@@ -49,6 +58,20 @@ const Men = () => {
       <h1 className="text-2xl font-bold mb-6 text-yellow-700 text-center">
         👕 Men's Clothing
       </h1>
+
+      {/* 🔍 Search Bar */}
+      <div className="flex justify-center mb-6">
+        <input
+          type="text"
+          placeholder="Search men's clothing..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset pagination when searching
+          }}
+          className="w-full sm:w-1/2 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -97,13 +120,13 @@ const Men = () => {
           ))
         ) : (
           <p className="text-center text-gray-500 text-lg col-span-full">
-            Loading...
+            {cards.length === 0 ? "Loading..." : "No products found"}
           </p>
         )}
       </div>
 
       {/* Pagination */}
-      {cards.length > productsPerPage && (
+      {filteredCards.length > productsPerPage && (
         <div className="flex justify-center items-center mt-10 space-x-2">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}

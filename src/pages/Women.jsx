@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 const Women = () => {
   const [cards, setCards] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 New search state
   const productsPerPage = 3;
 
   const { user, cart, setCart } = useContext(Context);
@@ -23,13 +24,21 @@ const Women = () => {
       .catch(console.error);
   }, []);
 
-  // Pagination logic
+  // 🔍 Filter by search term
+  const filteredCards = cards.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic (after filtering)
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = cards.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(cards.length / productsPerPage);
+  const currentProducts = filteredCards.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+  const totalPages = Math.ceil(filteredCards.length / productsPerPage);
 
-  // ✅ Fixed Add to Cart (uses JSON Server)
+  // ✅ Add to Cart (with JSON Server)
   const handleAddToCart = async (product) => {
     if (!user) {
       alert("Please login to add to cart");
@@ -44,7 +53,6 @@ const Women = () => {
     };
 
     try {
-      // ✅ Check if already exists for this user
       const existing = await fetch(
         `${API_URL}/cart?userId=${user.id}&id=${product.id}`
       );
@@ -54,7 +62,6 @@ const Women = () => {
         return;
       }
 
-      // ✅ Add new item to cart in JSON Server
       const res = await fetch(`${API_URL}/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -87,6 +94,20 @@ const Women = () => {
       <h1 className="text-2xl font-bold mb-6 text-pink-700 text-center">
         👗 Women's Clothing
       </h1>
+
+      {/* 🔍 Search Bar */}
+      <div className="flex justify-center mb-6">
+        <input
+          type="text"
+          placeholder="Search women's clothing..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset to first page on search
+          }}
+          className="w-full sm:w-1/2 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+        />
+      </div>
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -135,13 +156,13 @@ const Women = () => {
           ))
         ) : (
           <p className="text-center text-gray-500 text-lg col-span-full">
-            Loading...
+            {cards.length === 0 ? "Loading..." : "No products found"}
           </p>
         )}
       </div>
 
       {/* Pagination */}
-      {cards.length > productsPerPage && (
+      {filteredCards.length > productsPerPage && (
         <div className="flex justify-center items-center mt-10 space-x-2">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -149,7 +170,7 @@ const Women = () => {
             className={`px-4 py-2 rounded ${
               currentPage === 1
                 ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-yellow-500 text-white hover:bg-yellow-600"
+                : "bg-pink-500 text-white hover:bg-pink-600"
             }`}
           >
             Prev
@@ -161,8 +182,8 @@ const Women = () => {
               onClick={() => setCurrentPage(index + 1)}
               className={`px-4 py-2 rounded ${
                 currentPage === index + 1
-                  ? "bg-yellow-600 text-white"
-                  : "bg-white border hover:bg-yellow-100"
+                  ? "bg-pink-600 text-white"
+                  : "bg-white border hover:bg-pink-100"
               }`}
             >
               {index + 1}
@@ -175,7 +196,7 @@ const Women = () => {
             className={`px-4 py-2 rounded ${
               currentPage === totalPages
                 ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-yellow-500 text-white hover:bg-yellow-600"
+                : "bg-pink-500 text-white hover:bg-pink-600"
             }`}
           >
             Next
